@@ -1,0 +1,12 @@
+{
+  "name": "rabbitmq-tutorial",
+  "version": "1.0.0",
+  "description": "RabbitMQ tutorial",
+  "main": "index.js",
+  "repository": "https://github.com/aszabacsi/rabbitmq-tutorial.git",
+  "author": "Akos Szabacsi",
+  "license": "MIT",
+  "dependencies": {
+    "amqplib": "^0.5.2"
+  }
+}
