@@ -1,32 +1,35 @@
-const amqp = require('amqplib/callback_api');
-const conf = require('./conf');
+const connect = require('./connect');
 
-const send = (q, message) => {
+const send = async (q, message) => {
 
-  return new Promise((reject, resolve) => {
+  try 
+  {
+    const conn = await connect(); 
+    const ch = await conn.createChannel();
 
-    amqp.connect(conf.rabbitEndpoint, (err, conn) => {
-  
-      if(err) reject(err);
-    
-      conn.createChannel((err, ch) => {
+    let queue = await ch.checkQueue(q);
 
-        if(err) reject(err);
-  
-        ch.assertQueue(q, {
-          durable: true
-        });
-  
-        ch.sendToQueue(q, Buffer.from(message));
+    if(!queue) queue = await ch.assertQueue(q);
 
-        resolve();
-  
-      });
-    
+    if(!queue) queue = ch.assertQueue(q, {
+      // The message won't be lost even if RabbitMQ server dies
+      // The queue will be saved even if the RabbitMQ server dies
+      durable: true, 
     });
-  });
 
+    if(queue) {
+      ch.sendToQueue(q, Buffer.from(message), {
+        persistent: true // The message will be saved to the disk, but there is slight chance to loose the message still
+        // The safety with publisher confirms is 100%
+      });
+    } else {
+      throw new Error(`Failed to send ${message} to: ${queue}`)
+    }
 
+  } catch(e) {
+    console.error(e);
+    throw e;
+  }
 }
 
 module.exports = send;

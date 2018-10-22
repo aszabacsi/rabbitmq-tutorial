@@ -2,16 +2,16 @@ const send = require('./producer');
 const consume = require('./consumer');
 
 const q = 'Q';
-
-send(q, 'Hello QUEUE')
+const message = 'Hello Q';
+send(q, message)
 .then(() => {
-  console.log('SENT MESSAGE');
+  console.log(`SENT: ${message}`);
 })
 .catch(console.error);
 
 
 consume(q)
 .then((result) => {
-  console.log(result);
+  console.log(`RECEIVED: ${result}`);
 })
 .catch(console.error)
